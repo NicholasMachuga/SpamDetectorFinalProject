@@ -10,14 +10,21 @@ library(ggplot2)
 #Data
 data = data(spam, package = "kernlab")
 
-#Correlation Matrix
-
-
 #Changing $type to numeric for GLM
 spam$type <- as.character(spam$type)
 spam$type[spam$type == "nonspam"] <- 0
 spam$type[spam$type == "spam"] <- 1
 spam$type <- as.numeric(spam$type)
+
+#Correlation Matrix
+data.cor <- round(cor(spam), 2) 
+data.cor #correlation matrix for all emails
+all.spam <- spam[spam$type == '1', ]
+spam.cor <- round(cor(all.spam), 2)
+spam.cor #correlation matrix for only emails flagged 'spam'
+non.spam <- spam[spam$type == '0', ]
+nonspam.cor <- round(cor(non.spam), 2)
+nonspam.cor #correlation matrix for only emails flagged 'nonspam'
 
 #Train and test split, 60% split
 set.seed(1)
