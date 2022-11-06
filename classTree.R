@@ -53,47 +53,41 @@ printcp(spam.tree)
 # 7 0.013526      7   0.25879 0.27322 0.014809
 # 8 0.010000      8   0.24527 0.25789 0.014438
 
-prp(spam.tree, type=1, extra=1, split.font=1, varlen=-10)
-
 # classification tree
-spam.tree <- rpart(type ~., data =train.df, method="class")
-prp(default.ct, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
+prp(spam.tree, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
 
 # classify training records 
 spam.tree.pred.train <- predict(spam.tree,train.df,type = "class")
 # confusion matrix for training data
-confusionMatrix(spam.tree.point.pred.train, train.df$type)
+confusionMatrix(spam.tree.pred.train, train.df$type)
 
-# Output
 # Confusion Matrix and Statistics
 # 
 # Reference
 # Prediction nonspam spam
-# nonspam    1556  170
-# spam         95  939
+# nonspam    1543  164
+# spam        108  945
 # 
-# Accuracy : 0.904           
-# 95% CI : (0.8924, 0.9147)
+# Accuracy : 0.9014          
+# 95% CI : (0.8897, 0.9123)
 # No Information Rate : 0.5982          
 # P-Value [Acc > NIR] : < 2.2e-16       
 # 
-# Kappa : 0.798           
+# Kappa : 0.7933          
 # 
-# Mcnemar's Test P-Value : 0.000005473     
+# Mcnemar's Test P-Value : 0.0008534       
 #                                           
-#             Sensitivity : 0.9425          
-#             Specificity : 0.8467          
-#          Pos Pred Value : 0.9015          
-#          Neg Pred Value : 0.9081          
+#             Sensitivity : 0.9346          
+#             Specificity : 0.8521          
+#          Pos Pred Value : 0.9039          
+#          Neg Pred Value : 0.8974          
 #              Prevalence : 0.5982          
-#          Detection Rate : 0.5638          
-#    Detection Prevalence : 0.6254          
-#       Balanced Accuracy : 0.8946          
+#          Detection Rate : 0.5591          
+#    Detection Prevalence : 0.6185          
+#       Balanced Accuracy : 0.8934          
 #                                           
 #        'Positive' Class : nonspam         
-#                                
-
-
+                                  
 
 # classify validation records 
 spam.tree.pred.valid <- predict(spam.tree,valid.df,type = "class")
@@ -105,51 +99,63 @@ confusionMatrix(spam.tree.pred.valid, valid.df$type)
 # 
 # Reference
 # Prediction nonspam spam
-# nonspam    1053  130
-# spam         84  574
+# nonspam    1065  117
+# spam         72  587
 # 
-# Accuracy : 0.8838          
-# 95% CI : (0.8682, 0.8981)
+# Accuracy : 0.8973          
+# 95% CI : (0.8826, 0.9108)
 # No Information Rate : 0.6176          
 # P-Value [Acc > NIR] : < 2.2e-16       
 # 
-# Kappa : 0.7508          
+# Kappa : 0.78            
 # 
-# Mcnemar's Test P-Value : 0.002097        
+# Mcnemar's Test P-Value : 0.001372        
 #                                           
-#             Sensitivity : 0.9261          
-#             Specificity : 0.8153          
-#          Pos Pred Value : 0.8901          
-#          Neg Pred Value : 0.8723          
+#             Sensitivity : 0.9367          
+#             Specificity : 0.8338          
+#          Pos Pred Value : 0.9010          
+#          Neg Pred Value : 0.8907          
 #              Prevalence : 0.6176          
-#          Detection Rate : 0.5720          
-#    Detection Prevalence : 0.6426          
-#       Balanced Accuracy : 0.8707          
+#          Detection Rate : 0.5785          
+#    Detection Prevalence : 0.6420          
+#       Balanced Accuracy : 0.8852          
 #                                           
-#        'Positive' Class : nonspam    
+#        'Positive' Class : nonspam         
 
-# [NOT COMPLETE ]Working on 10 fold cross validation
-# cross-validation with 10 folds (argument xval)
-# argument cp sets the smallest value for the complexity parameter.
-spam.tree2 <-  rpart(type ~ make + address + all + num3d + our + over + 
-                       remove + internet + order + receive + will + free + business + 
-                       email + you + credit + your + font + num000 + money + hp + 
-                       hpl + george + labs + data + num415 + num85 + technology + 
-                       num1999 + parts + meeting + original + project + re + edu + 
-                       table + conference + charSemicolon + charExclamation + charDollar + 
-                       charHash + capitalLong + capitalTotal, data = train.df, method="class", cp=0.00001, xval=10)
-printcp(spam.tree2)
+# variable of importance
+t(t(spam.tree$variable.importance))
 
-# Prune tree by the lower complexity parameter
-pfit <- prune(spam.tree2, cp = spam.tree2$cptable[which.min(spam.tree$cptable[,"xerror"]),"CP"])
-pfit
+#############################################################################
+# 10 Fold cross validation using naive Bayes
+# naive Baye
+set.seed(1)
 
-# Return value of last node of low complexity parameter
-pam.tree2$cptable[which.min(spam.tree2$cptable[,"xerror"]),"CP"]
+# object, controls how the train function creates the model
 
-# length(spam.tree2$frame$var[spam.tree2$frame$var == "<leaf>"])
+set.seed(1)
+tr_control <- trainControl(method="cv", number =10)
+CVDmodel <-  train(type ~ make + address + all + num3d + our + over + 
+                  remove + internet + order + receive + will + free + business + 
+                  email + you + credit + your + font + num000 + money + hp + 
+                  hpl + george + labs + data + num415 + num85 + technology + 
+                  num1999 + parts + meeting + original + project + re + edu + 
+                  table + conference + charSemicolon + charExclamation + charDollar + 
+                  charHash + capitalLong + capitalTotal, data = df, method="rpart",trControl=tr_control)
+print(CVDmodel)
 
-# Best pruned tree 
-prp(spam.tree2, type = 1, extra = 1, split.font = 1, varlen = -10)
-
-
+# BEST ACCURACY FOR 10-FOLD-CVD CP= 0.0430226, ACCURACY=86.35%
+# CART 
+# 
+# 4601 samples
+# 43 predictor
+# 2 classes: 'nonspam', 'spam' 
+# 
+# No pre-processing
+# Resampling: Cross-Validated (10 fold) 
+# Summary of sample sizes: 4142, 4141, 4141, 4141, 4140, 4140, ... 
+# Resampling results across tuning parameters:
+#   
+#   cp          Accuracy   Kappa    
+# 0.04302261  0.8635064  0.7087469
+# 0.14892443  0.7898371  0.5474296
+# 0.47655819  0.6907037  0.2518403
